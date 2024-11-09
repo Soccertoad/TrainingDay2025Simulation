@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -37,12 +38,17 @@ public class RobotContainer {
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
+    private final Elevator elevator;
+    private final Arm arm;
+
     /* Path follower */
     // private final SendableChooser<Command> autoChooser;
 
-    public RobotContainer() {
-        configureBindings();
+    public RobotContainer(Elevator elevator, Arm arm) {
+        this.elevator = elevator;
+        this.arm = arm;
 
+        configureBindings();
         // autoChooser = AutoBuilder.buildAutoChooser("Tests");
         // SmartDashboard.putData("Auto Mode", autoChooser);
     }
@@ -58,11 +64,6 @@ public class RobotContainer {
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
 
         joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(0.5).withVelocityY(0))
@@ -82,6 +83,13 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        joystick.y().whileTrue(elevator.setPosition(Inches.of(25)).alongWith(arm.setPosition(Degrees.of(180))))
+            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
+        joystick.a().whileTrue(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
+        joystick.x().whileTrue(elevator.setPosition(Inches.zero()).alongWith(arm.setPosition(Degrees.zero())));
+        joystick.b().whileTrue(elevator.setPosition(Inches.of(50)).alongWith(arm.setPosition(Degrees.of(0))))
+            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
     }
 
     public Command getAutonomousCommand() {

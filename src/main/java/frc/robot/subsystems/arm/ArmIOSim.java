@@ -2,10 +2,7 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
@@ -24,7 +21,7 @@ public class ArmIOSim implements ArmIO{
     private final double gearing = 75;
     private final Distance armLength = Inches.of(24.719);
     private final Mass armWeight = Pounds.of(11);
-    private final Angle minimumAngle = Degrees.of(-360);
+    private final Angle minimumAngle = Degrees.of(0);
     private final Angle maximumAngle = Degrees.of(360);
     private final Angle startingAngle = Degrees.of(0);
     private final SingleJointedArmSim sim = new SingleJointedArmSim(
@@ -46,12 +43,12 @@ public class ArmIOSim implements ArmIO{
     private final double kG = 0.126;
     private final double kV = 1.3;
     private final double kA = 5;
-    private final double kP = 0.0;
+    private final double kP = 1.0;
     private final double kI = 0.0;
     private final double kD = 0.0;
     private final AngularVelocity maxVelocity = DegreesPerSecond.of(360);
     private final AngularAcceleration maxAcceleration = DegreesPerSecondPerSecond.of(360); 
-    private final ArmFeedforward ff = new ArmFeedforward(kS, kG, kV, kA);
+    private ArmFeedforward ff = new ArmFeedforward(kS, kG, kV, kA);
     private final ProfiledPIDController controller = new ProfiledPIDController(
         kP, 
         kI,
@@ -109,6 +106,11 @@ public class ArmIOSim implements ArmIO{
     @Override
     public void setPID(double p, double i, double d) {
         controller.setPID(p, i, d);
+    }
+
+    @Override
+    public void setFF(double kS, double kG, double kV, double kA) {
+        this.ff = new ArmFeedforward(kS, kG, kV, kA);
     }
 
     @Override

@@ -49,5 +49,7 @@ public interface ArmIO {
 
     default void setPID(double p, double i, double d) {}
 
+    default void setFF(double kS, double kG, double kV, double kA) {}
+
     default void stop() {}
 }

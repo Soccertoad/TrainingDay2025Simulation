@@ -10,10 +10,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 import com.ctre.phoenix6.Utils;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.simulation.MechanismSimulator;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
@@ -32,7 +30,7 @@ public class Robot extends LoggedRobot {
   private final boolean kUseLimelight = false;
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    m_robotContainer = new RobotContainer(elevator, arm);
   }
 
   @Override
@@ -49,17 +47,6 @@ public class Robot extends LoggedRobot {
         }
       }
 
-      SmartDashboard.putData(
-        "Baby Bird", 
-        elevator.setPosition(Inches.of(50))
-        .alongWith(arm.setPosition(Degrees.of(180)))
-      );
-
-      SmartDashboard.putData(
-        "Stow", 
-        elevator.setPosition(Inches.of(0))
-        .alongWith(arm.setPosition(Degrees.of(70)))
-      );
   }
 
   @Override

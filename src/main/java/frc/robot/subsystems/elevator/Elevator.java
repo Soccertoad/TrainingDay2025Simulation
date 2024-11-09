@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotState;
 
@@ -58,5 +59,13 @@ public class Elevator extends SubsystemBase {
 
     public Command setPosition(Distance position) {
         return runOnce(() -> this.setpoint = position);
+    }
+
+    public Command waitForGreaterThanPosition(Distance position) {
+        return Commands.waitUntil(() -> this.inputs.position.gt(position));
+    }
+
+    public Command waitForLessThanPosition(Distance position) {
+        return Commands.waitUntil(() -> this.inputs.position.lt(position));
     }
 }

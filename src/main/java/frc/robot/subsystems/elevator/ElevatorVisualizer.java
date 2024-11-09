@@ -4,7 +4,6 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -19,6 +18,9 @@ public class ElevatorVisualizer {
     private final Mechanism2d panel;
     private final MechanismRoot2d root;
     private final MechanismLigament2d elevator;
+
+    private static final double ElevatorXModifier = -Math.cos(Degrees.of(45).in(Radians));
+    private static final double ElevatorZModifier = Math.sin(Degrees.of(45).in(Radians));
 
     public ElevatorVisualizer(String key, Color color) {
         this.key = key;
@@ -42,9 +44,9 @@ public class ElevatorVisualizer {
         elevator.setLength(position.in(Meters));
         Logger.recordOutput("Elevator/Mechanism2d/" + key, this.panel);
 
-        double elevatorX = -position.in(Meters) * Math.cos(Units.degreesToRadians(45));
-        double elevatorZ = position.in(Meters) * Math.sin(Units.degreesToRadians(45));
-        Pose3d elevator3d = new Pose3d(elevatorX, 0, elevatorZ, new Rotation3d());
+        Distance elevatorX = position.times(ElevatorXModifier);
+        Distance elevatorZ = position.times(ElevatorZModifier);
+        Pose3d elevator3d = new Pose3d(elevatorX, Inches.zero(), elevatorZ, new Rotation3d());
         Logger.recordOutput("Elevator/Mechanism3d/" + key, elevator3d);
     }
   }
