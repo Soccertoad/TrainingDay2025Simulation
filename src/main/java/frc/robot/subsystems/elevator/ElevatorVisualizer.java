@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorAngle;
+import static frc.robot.subsystems.elevator.ElevatorConstants.XModifier;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ZModifier;
 
 public class ElevatorVisualizer {
     private final String key;
@@ -19,8 +22,6 @@ public class ElevatorVisualizer {
     private final MechanismRoot2d root;
     private final MechanismLigament2d elevator;
 
-    private static final double ElevatorXModifier = -Math.cos(Degrees.of(45).in(Radians));
-    private static final double ElevatorZModifier = Math.sin(Degrees.of(45).in(Radians));
 
     public ElevatorVisualizer(String key, Color color) {
         this.key = key;
@@ -31,7 +32,7 @@ public class ElevatorVisualizer {
             new MechanismLigament2d(
                 "Elevator",
                 Inches.of(0).in(Meters),
-                45,
+                ElevatorAngle.in(Degrees),
                 10,
                 new Color8Bit(color)
             )
@@ -44,8 +45,8 @@ public class ElevatorVisualizer {
         elevator.setLength(position.in(Meters));
         Logger.recordOutput("Elevator/Mechanism2d/" + key, this.panel);
 
-        Distance elevatorX = position.times(ElevatorXModifier);
-        Distance elevatorZ = position.times(ElevatorZModifier);
+        Distance elevatorX = position.times(XModifier);
+        Distance elevatorZ = position.times(ZModifier);
         Pose3d elevator3d = new Pose3d(elevatorX, Inches.zero(), elevatorZ, new Rotation3d());
         Logger.recordOutput("Elevator/Mechanism3d/" + key, elevator3d);
     }

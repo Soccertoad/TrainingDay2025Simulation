@@ -1,8 +1,21 @@
 package frc.robot.subsystems.arm;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.subsystems.arm.ArmConstants.FollowerProfile;
+import static frc.robot.subsystems.arm.ArmConstants.ForwardTorqueLimit;
+import static frc.robot.subsystems.arm.ArmConstants.Gearing;
+import static frc.robot.subsystems.arm.ArmConstants.LeaderProfile;
+import static frc.robot.subsystems.arm.ArmConstants.MaxAcceleration;
+import static frc.robot.subsystems.arm.ArmConstants.MaxJerk;
+import static frc.robot.subsystems.arm.ArmConstants.MaxVelocity;
+import static frc.robot.subsystems.arm.ArmConstants.ReverseTorqueLimit;
+import static frc.robot.subsystems.arm.ArmConstants.SupplyCurrentLimit;
 import static frc.robot.subsystems.arm.ArmConstants.TalonFXGains;
+import static frc.robot.subsystems.arm.ArmConstants.TorqueCurrentLimit;
 
 import java.util.List;
 
@@ -43,26 +56,31 @@ public class ArmIOTalonFX implements ArmIO {
     private final TalonFXConfiguration config = new TalonFXConfiguration();
 
     public ArmIOTalonFX() {
-        leader = new TalonFX(0);
-        follower = new TalonFX(1);
-        follower.setControl(new Follower(0, true));
+        leader = new TalonFX(LeaderProfile.id(), LeaderProfile.bus());
+        follower = new TalonFX(FollowerProfile.id(), FollowerProfile.bus());
+        follower.setControl(new Follower(LeaderProfile.id(), true));
         
-        config.Slot0.kP = TalonFXGains.kP();
-        config.Slot0.kI = TalonFXGains.kI();
-        config.Slot0.kD = TalonFXGains.kD();
-        config.Slot0.kG = TalonFXGains.kG();
-        config.Slot0.kS = TalonFXGains.kS();
-        config.Slot0.kV = TalonFXGains.kV();
-        config.Slot0.kA = TalonFXGains.kA();
-        config.MotionMagic.MotionMagicJerk = 0.0;
-        config.MotionMagic.MotionMagicAcceleration = 720.0;
-        config.MotionMagic.MotionMagicCruiseVelocity = 720.0;
-        config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-        config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+        config.Slot0.kP = TalonFXGains.kP;
+        config.Slot0.kI = TalonFXGains.kI;
+        config.Slot0.kD = TalonFXGains.kD;
+        config.Slot0.kS = TalonFXGains.kS;
+        config.Slot0.kG = TalonFXGains.kG;
+        config.Slot0.kV = TalonFXGains.kV;
+        config.Slot0.kA = TalonFXGains.kA;
+        config.MotionMagic.MotionMagicJerk = MaxJerk;
+        config.MotionMagic.MotionMagicAcceleration = MaxVelocity.in(DegreesPerSecond);
+        config.MotionMagic.MotionMagicCruiseVelocity = MaxAcceleration.in(DegreesPerSecondPerSecond);
+
+        config.TorqueCurrent.PeakForwardTorqueCurrent = ForwardTorqueLimit.in(Amps);
+        config.TorqueCurrent.PeakReverseTorqueCurrent = ReverseTorqueLimit.in(Amps);
+        config.CurrentLimits.StatorCurrentLimit = TorqueCurrentLimit.in(Amps);
+        config.CurrentLimits.SupplyCurrentLimit = SupplyCurrentLimit.in(Amps);
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.Feedback.RotorToSensorRatio = 10.0;
-        config.Feedback.SensorToMechanismRatio = 1.0;
+        config.Feedback.SensorToMechanismRatio = Gearing;
         leader.getConfigurator().apply(config, 1.0);
 
         positionSignal = leader.getPosition();

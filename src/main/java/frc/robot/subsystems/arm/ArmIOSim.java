@@ -3,59 +3,54 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.arm.ArmConstants.Gearing;
+import static frc.robot.subsystems.arm.ArmConstants.Length;
+import static frc.robot.subsystems.arm.ArmConstants.MaxAcceleration;
+import static frc.robot.subsystems.arm.ArmConstants.MaxVelocity;
+import static frc.robot.subsystems.arm.ArmConstants.MaximumAngle;
+import static frc.robot.subsystems.arm.ArmConstants.MinimumAngle;
+import static frc.robot.subsystems.arm.ArmConstants.Motors;
+import static frc.robot.subsystems.arm.ArmConstants.SimGains;
+import static frc.robot.subsystems.arm.ArmConstants.StartingAngle;
+import static frc.robot.subsystems.arm.ArmConstants.Weight;
 
 public class ArmIOSim implements ArmIO{
-    private final DCMotor armMotors = DCMotor.getKrakenX60(2);
-    private final double gearing = 75;
-    private final Distance armLength = Inches.of(24.719);
-    private final Mass armWeight = Pounds.of(11);
-    private final Angle minimumAngle = Degrees.of(0);
-    private final Angle maximumAngle = Degrees.of(360);
-    private final Angle startingAngle = Degrees.of(0);
     private final SingleJointedArmSim sim = new SingleJointedArmSim(
-        armMotors,
-        gearing,
+        Motors,
+        Gearing,
         SingleJointedArmSim.estimateMOI(
-            armLength.in(Meters),
-            armWeight.in(Kilograms)
+            Length.in(Meters),
+            Weight.in(Kilograms)
         ),
-        armLength.in(Meters), 
-        minimumAngle.in(Radians),
-        maximumAngle.in(Radians),
+        Length.in(Meters), 
+        MinimumAngle.in(Radians),
+        MaximumAngle.in(Radians),
         true, 
-        startingAngle.in(Radians)
+        StartingAngle.in(Radians)
     );
 
     private final MutVoltage appliedVolts = Volts.mutable(0);
-    private final double kS = 0.0;
-    private final double kG = 0.126;
-    private final double kV = 1.3;
-    private final double kA = 5;
-    private final double kP = 1.0;
-    private final double kI = 0.0;
-    private final double kD = 0.0;
-    private final AngularVelocity maxVelocity = DegreesPerSecond.of(360);
-    private final AngularAcceleration maxAcceleration = DegreesPerSecondPerSecond.of(360); 
-    private ArmFeedforward ff = new ArmFeedforward(kS, kG, kV, kA);
+    private ArmFeedforward ff = new ArmFeedforward(
+        SimGains.kS,
+        SimGains.kG,
+        SimGains.kV,
+        SimGains.kA  
+    );
     private final ProfiledPIDController controller = new ProfiledPIDController(
-        kP, 
-        kI,
-        kD,
+        SimGains.kP,
+        SimGains.kI,
+        SimGains.kD,
         new Constraints(
-            maxVelocity.magnitude(), 
-            maxAcceleration.magnitude()
+            MaxVelocity.in(DegreesPerSecond), 
+            MaxAcceleration.in(DegreesPerSecondPerSecond)
         )
     );
 

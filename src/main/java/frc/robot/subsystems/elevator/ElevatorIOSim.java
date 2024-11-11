@@ -3,11 +3,18 @@ package frc.robot.subsystems.elevator;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.Gearing;
+import static frc.robot.subsystems.elevator.ElevatorConstants.DrumRadius;
+import static frc.robot.subsystems.elevator.ElevatorConstants.MaximumHeight;
+import static frc.robot.subsystems.elevator.ElevatorConstants.MinimumHeight;
+import static frc.robot.subsystems.elevator.ElevatorConstants.Motors;
+import static frc.robot.subsystems.elevator.ElevatorConstants.SimGains;
+import static frc.robot.subsystems.elevator.ElevatorConstants.StartingHeight;
+import static frc.robot.subsystems.elevator.ElevatorConstants.Weight;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
@@ -15,19 +22,27 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class ElevatorIOSim implements ElevatorIO{
     private final ElevatorSim sim = new ElevatorSim(
-        DCMotor.getKrakenX60(2),
-        4, 
-        Pounds.of(9.8).in(Kilograms), 
-        Inches.of(2).in(Meters), 
-        Inches.of(0).in(Meters), 
-        Inches.of(52).in(Meters), 
-        false, 
-        Inches.of(0).in(Meters)
+        Motors,
+        Gearing, 
+        Weight.in(Kilograms), 
+        DrumRadius.in(Meters), 
+        MinimumHeight.in(Meters), 
+        MaximumHeight.in(Meters), 
+        true, 
+        StartingHeight.in(Meters)
     );
 
     private final MutVoltage appliedVolts = Volts.mutable(0);
-    private final PIDController controller = new PIDController(0, 0, 0);
-    private final ElevatorFeedforward ff = new ElevatorFeedforward(0, 0, 0);
+    private final PIDController controller = new PIDController(
+        SimGains.kP,
+        SimGains.kI, 
+        SimGains.kD
+    );
+    private final ElevatorFeedforward ff = new ElevatorFeedforward(
+        SimGains.kS, 
+        SimGains.kV, 
+        SimGains.kA
+    );
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs) {
