@@ -1,4 +1,4 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -6,6 +6,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import frc.robot.subsystems.arm.ArmConstants;
 import frc.robot.util.CanDef;
 import frc.robot.util.Gains;
 import frc.robot.util.CanDef.CanBus;
@@ -14,14 +15,9 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 
-public class ArmConstants {
+public class WristConstants {
     public static final CanDef LeaderProfile = CanDef.builder()
         .id(0)
-        .bus(CanBus.Rio)
-        .build();
-    
-    public static final CanDef FollowerProfile = CanDef.builder()
-        .id(1)
         .bus(CanBus.Rio)
         .build();
 
@@ -53,17 +49,17 @@ public class ArmConstants {
     public static final Current ForwardTorqueLimit = Amps.of(80);
     public static final Current ReverseTorqueLimit = Amps.of(-80);
 
-    public static final int NumMotors = 2;
+    public static final int NumMotors = 1;
     public static final double Gearing = 75;
-    public static final Distance Length = Inches.of(24.719);
-    public static final Mass Weight = Pounds.of(11);
+    public static final Distance Length = Inches.of(9.4);
+    public static final Mass Weight = Pounds.of(4);
     public static final DCMotor Motors = DCMotor.getKrakenX60(NumMotors);
     public static final Angle MaximumAngle = Degrees.of(360);
-    public static final Angle MinimumAngle = Degrees.of(0);
+    public static final Angle MinimumAngle = Degrees.of(-360);
     public static final Angle StartingAngle = Degrees.zero();
 
-    public static final Distance XPosition = Meters.of(0.07);
-    public static final Distance YPosition = Inches.of(0);
-    public static final Distance ZPosition = Meters.of(0.377);
-    public static final Angle PitchModifier = Degrees.of(84);
+    public static final Distance XPosition = Inches.of(2.25);
+    public static final Distance YPosition = Inches.of(-15);
+    public static final Distance ZPosition = Inches.of(20.5);
+    public static final Angle PitchModifier = Degrees.of(-40);
 }

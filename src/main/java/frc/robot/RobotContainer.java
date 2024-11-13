@@ -18,6 +18,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.wrist.Wrist;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -40,13 +41,15 @@ public class RobotContainer {
 
     private final Elevator elevator;
     private final Arm arm;
+    private final Wrist wrist;
 
     /* Path follower */
     // private final SendableChooser<Command> autoChooser;
 
-    public RobotContainer(Elevator elevator, Arm arm) {
+    public RobotContainer(Elevator elevator, Arm arm, Wrist wrist) {
         this.elevator = elevator;
         this.arm = arm;
+        this.wrist = wrist;
 
         configureBindings();
         // autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -84,12 +87,13 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        joystick.y().whileTrue(elevator.setPosition(Inches.of(25)).alongWith(arm.setPosition(Degrees.of(180))))
-            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
+        joystick.y().whileTrue(
+            elevator.setPosition(Inches.of(25)).alongWith(arm.setPosition(Degrees.of(180))).alongWith(wrist.setPosition(Degrees.of(100))))
+            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))).alongWith(wrist.setPosition(Degrees.of(0))));
         joystick.a().whileTrue(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
         joystick.x().whileTrue(elevator.setPosition(Inches.zero()).alongWith(arm.setPosition(Degrees.zero())));
-        joystick.b().whileTrue(elevator.setPosition(Inches.of(50)).alongWith(arm.setPosition(Degrees.of(0))))
-            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))));
+        joystick.b().whileTrue(elevator.setPosition(Inches.of(50)).alongWith(arm.setPosition(Degrees.of(0))).alongWith(wrist.setPosition(Degrees.of(-60))))
+            .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))).alongWith(wrist.setPosition(Degrees.of(0))));
     }
 
     public Command getAutonomousCommand() {

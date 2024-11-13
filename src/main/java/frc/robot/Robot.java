@@ -16,6 +16,8 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.wrist.Wrist;
+import frc.robot.subsystems.wrist.WristIOSim;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -24,13 +26,14 @@ public class Robot extends LoggedRobot {
 
   private final Elevator elevator = new Elevator(new ElevatorIOSim());
   private final Arm arm = new Arm(new ArmIOSim());
+  private final Wrist wrist = new Wrist(new WristIOSim());
 
   private final RobotContainer m_robotContainer;
 
   private final boolean kUseLimelight = false;
 
   public Robot() {
-    m_robotContainer = new RobotContainer(elevator, arm);
+    m_robotContainer = new RobotContainer(elevator, arm, wrist);
   }
 
   @Override
@@ -83,6 +86,7 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    wrist.setPosition(Degrees.of(0));
     elevator.setPosition(Inches.of(50)).schedule();
     arm.setPosition(Degrees.of(45)).schedule();
   }
