@@ -16,6 +16,7 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.util.SimulatedArena;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -50,7 +51,13 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
+  public void simulationPeriodic() {
+    SimulatedArena.getInstance().simulationPeriodic();
+  }
+
+  @Override
   public void robotPeriodic() {
+    m_robotContainer.updateFieldSimAndDisplay();
     CommandScheduler.getInstance().run();
   }
 
