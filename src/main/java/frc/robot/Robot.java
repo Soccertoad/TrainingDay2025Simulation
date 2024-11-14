@@ -18,6 +18,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIOSim;
+import frc.robot.util.VirtualSubsystem;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -54,6 +55,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotPeriodic() {
+    VirtualSubsystem.periodicAll();
     CommandScheduler.getInstance().run();
   }
 
