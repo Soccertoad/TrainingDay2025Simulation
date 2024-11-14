@@ -1,30 +1,19 @@
 package frc.robot.subsystems.vision;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
-
-import javax.xml.crypto.dsig.Transform;
-
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.proto.Photon;
 import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 
 public class VisionIOSim implements VisionIO{
     private final VisionSystemSim visionSystemSim;
@@ -77,18 +66,6 @@ public class VisionIOSim implements VisionIO{
 
             inputs.latency = latest.metadata.getLatencyMillis() / 1000.0;
             inputs.tagCount = latest.getTargets().size();
-
-            
-            // inputs.tags[index] = new int[inputs.tagCount[index]];
-            // inputs.tagAmbiguities[index] = new double[inputs.tagCount[index]];
-
-            // PhotonTrackedTarget target;
-            // for (int i = 0; i < inputs.tagCount[index]; i++) {
-            //     target = targets.get(i);
-            //     inputs.tags[index][i] = target.fiducialId;
-            //     inputs.tagAmbiguities[index][i] = target.poseAmbiguity;
-            // }
-
         }
     }
     
