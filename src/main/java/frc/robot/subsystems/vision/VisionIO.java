@@ -11,6 +11,7 @@ public interface VisionIO {
     
     @AutoLog
     class VisionIOInputs {
+        public String name = "";
         public Pose2d pose = new Pose2d();
         public double timestampSeconds = 0;
         public double latency = 0;

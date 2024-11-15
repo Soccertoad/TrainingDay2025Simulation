@@ -16,57 +16,59 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionIOSim implements VisionIO{
-    private final VisionSystemSim visionSystemSim;
+    private static VisionSystemSim VisionSystemSim;
 
-    private final PhotonPoseEstimator[] poseEstimators;
-    private final PhotonCamera[] cameras;
-    private final PhotonCameraSim[] cameraSims;
+    private final PhotonPoseEstimator poseEstimator;
+    private final CameraConfig config;
+    private final PhotonCamera camera;
+    private final PhotonCameraSim cameraSim;
     
 
-    public VisionIOSim(CameraConfig ...cameraConfigs) {
-        this.visionSystemSim = new VisionSystemSim("apriltag");
-        this.cameras = new PhotonCamera[cameraConfigs.length];
-        this.cameraSims = new PhotonCameraSim[cameraConfigs.length];
-        this.poseEstimators = new PhotonPoseEstimator[cameraConfigs.length];
-
-        for(int index = 0; index < cameraConfigs.length; index++) {
-            this.cameras[index] = new PhotonCamera(cameraConfigs[index].name);
-            this.cameraSims[index] = new PhotonCameraSim(this.cameras[index], VisionConstants.SimCameraProperties);
-            this.visionSystemSim.addCamera(this.cameraSims[index], cameraConfigs[index].cameraPosition);
-            this.poseEstimators[index] = new PhotonPoseEstimator(
-                VisionConstants.fieldLayout,
-                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                cameraConfigs[index].cameraPosition
-            ) {{
-                setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
-            }};
+    public VisionIOSim(CameraConfig cameraConfig) {
+        if (VisionSystemSim == null) {
+            synchronized (VisionIOSim.class) {
+                if (VisionSystemSim == null) {
+                    VisionSystemSim = new VisionSystemSim("apriltag");
+                    VisionSystemSim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo));
+                }
+            }
         }
-
-        this.visionSystemSim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo));
+        this.config = cameraConfig;
+        this.camera = new PhotonCamera(cameraConfig.name);
+        this.cameraSim = new PhotonCameraSim(this.camera, VisionConstants.SimCameraProperties, 0, 5);
+        VisionSystemSim.addCamera(this.cameraSim, cameraConfig.cameraPosition);
+        this.poseEstimator = new PhotonPoseEstimator(
+            VisionConstants.FieldLayout,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            cameraConfig.cameraPosition
+        ) {{
+            setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        }};
     }
 
 
     @Override
     public void updateInputs(VisionIOInputs inputs, Pose2d robotPose) {
-        this.visionSystemSim.update(robotPose);
+        VisionSystemSim.update(robotPose);
         Arrays.fill(inputs.tagsSeen, false);
 
-        for(int index = 0; index < cameraSims.length; index++) {
-            PhotonPipelineResult latest = cameras[index].getLatestResult();
-            Optional<MultiTargetPNPResult> pose = latest.multitagResult;
+        inputs.name = camera.getName();
 
-            if (pose.isPresent()) {
-                Transform3d best = pose.get().estimatedPose.best;
-                inputs.pose = new Pose3d(best.getTranslation(), best.getRotation()).toPose2d();
-                pose.get().fiducialIDsUsed.forEach(id -> {
-                    Optional<Pose3d> idPose = VisionConstants.fieldLayout.getTagPose(id);
-                    if (idPose.isPresent()) inputs.tagsSeen[id] = true;
-                });
-            }
+        PhotonPipelineResult latest = camera.getLatestResult();
+        Optional<MultiTargetPNPResult> pose = latest.multitagResult;
 
-            inputs.latency = latest.metadata.getLatencyMillis() / 1000.0;
-            inputs.tagCount = latest.getTargets().size();
+        if (pose.isPresent()) {
+            Transform3d best = pose.get().estimatedPose.best.plus(config.cameraPosition.inverse());
+            inputs.pose = new Pose3d(best.getTranslation(), best.getRotation()).toPose2d();
+            pose.get().fiducialIDsUsed.forEach(id -> {
+                Optional<Pose3d> idPose = VisionConstants.FieldLayout.getTagPose(id);
+                if (idPose.isPresent()) inputs.tagsSeen[id] = true;
+            });
         }
+
+        inputs.latency = latest.metadata.getLatencyMillis() / 1000.0;
+        inputs.tagCount = latest.getTargets().size();
+        inputs.timestampSeconds = latest.getTimestampSeconds();
     }
     
     public record CameraConfig(String name, Transform3d cameraPosition) {}

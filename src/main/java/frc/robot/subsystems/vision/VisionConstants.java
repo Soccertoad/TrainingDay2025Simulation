@@ -15,5 +15,5 @@ public class VisionConstants {
         setLatencyStdDevMs(5);
     }};
 
-    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+    public static final AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
 }

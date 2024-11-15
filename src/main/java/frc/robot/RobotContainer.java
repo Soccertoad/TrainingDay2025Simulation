@@ -9,7 +9,9 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -43,13 +45,67 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final Vision vision = new Vision(
+        () -> this.drivetrain.getState().Pose,
         new VisionIOSim(
             new VisionIOSim.CameraConfig(
                 "front",
-                new Transform3d()
+                new Transform3d(
+                    Meters.of(.2815),
+                    Meters.of(.2511),
+                    Meters.of(.2317),
+                    new Rotation3d(
+                        Degrees.of(0), 
+                        Degrees.of(-20), 
+                        Degrees.of(0)
+                    )
+                )
             )
         ),
-        () -> this.drivetrain.getState().Pose
+        new VisionIOSim(
+            new VisionIOSim.CameraConfig(
+                "back",
+                new Transform3d(
+                    Meters.of(.2815),
+                    Meters.of(.2511),
+                    Meters.of(.2317),
+                    new Rotation3d(
+                        Degrees.of(0), 
+                        Degrees.of(-20), 
+                        Degrees.of(180)
+                    )
+                )
+            )
+        ),
+        new VisionIOSim(
+            new VisionIOSim.CameraConfig(
+                "left",
+                new Transform3d(
+                    Meters.of(-0.09993),
+                    Meters.of(-0.316363),
+                    Meters.of(.2317),
+                    new Rotation3d(
+                        Degrees.of(0), 
+                        Degrees.of(-20), 
+                        Degrees.of(90)
+                    )
+                )
+            )
+        ),
+        new VisionIOSim(
+            new VisionIOSim.CameraConfig(
+                "right",
+                new Transform3d(
+                    Meters.of(-0.14949),
+                    Meters.of(0.291473),
+                    Meters.of(0.229238),
+                    new Rotation3d(
+                        Degrees.of(0), 
+                        Degrees.of(-20), 
+                        Degrees.of(-90)
+                    )
+                )
+            )
+        )
     );
 
     private final Elevator elevator;

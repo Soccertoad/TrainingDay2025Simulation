@@ -15,31 +15,46 @@ import frc.robot.util.VirtualSubsystem;
 
 public class Vision extends VirtualSubsystem {
 
-    private final VisionIO io;
-    private final VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
+    private final VisionIO[] ios;
+    private final VisionIOInputsAutoLogged[] inputs;
     private final Supplier<Pose2d> robotPoseSupplier;
     
 
 
-    public Vision(VisionIO io, Supplier<Pose2d> robotPoseSupplier) {
-        this.io = io;
+    public Vision(Supplier<Pose2d> robotPoseSupplier, VisionIO ...io) {
+        this.ios = io;
+        this.inputs = new VisionIOInputsAutoLogged[io.length];
         this.robotPoseSupplier = robotPoseSupplier;
     }
 
     @Override
     public void periodic() {
-        this.io.updateInputs(inputs, robotPoseSupplier.get());
-        Logger.processInputs("vision", inputs);
-        List<Pose3d> tags = new ArrayList<>();
+        for (int index = 0; index < ios.length; index++) {
+            var io = this.ios[index];
+            var input = this.inputs[index];
 
-        for (int i = 0; i < inputs.tagsSeen.length; i++) {
-            if (inputs.tagsSeen[i]) {
-                Optional<Pose3d> pose = VisionConstants.fieldLayout.getTagPose(i);
-                if (pose.isPresent()) tags.add(pose.get());
+            if (input == null) {
+                input = new VisionIOInputsAutoLogged();
+                this.inputs[index] = input;
             }
+
+            io.updateInputs(input, robotPoseSupplier.get());
+
+            Logger.processInputs("vision-" + input.name, input);
+
+            List<Pose3d> tags = new ArrayList<>();
+
+            for (int i = 0; i < input.tagsSeen.length; i++) {
+                if (input.tagsSeen[i]) {
+                    Optional<Pose3d> pose = VisionConstants.FieldLayout.getTagPose(i);
+                    if (pose.isPresent()) tags.add(pose.get());
+                }
+            }
+
+            Pose3d[] tagArray = tags.toArray(new Pose3d[tags.size()]);
+
+            Logger.recordOutput("vision-" + input.name + "/TagPoses", tagArray);
         }
-        if (tags.size() > 0) Logger.recordOutput("vision/tagsSeen", tags.toArray(new Pose3d[tags.size()]));
-        
     }
     
 }
