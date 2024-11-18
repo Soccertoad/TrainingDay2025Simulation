@@ -23,6 +23,7 @@ public class WristVisualizer {
     private final Mechanism2d panel;
     private final MechanismRoot2d root;
     private final MechanismLigament2d arm;
+    private Pose3d latestPose;
 
     private static final double ElevatorXModifier = -Math.cos(Degrees.of(45).in(Radians));
     private static final double ElevatorZModifier = Math.sin(Degrees.of(45).in(Radians));
@@ -61,6 +62,11 @@ public class WristVisualizer {
             new Rotation3d(0.0, position.in(Radians), 0.0)
         );
 
+        latestPose = wristPose;
         Logger.recordOutput("Wrist/Mechanism3d/" + key, wristPose);
+    }
+
+    public Pose3d getPose() {
+        return latestPose;
     }
   }

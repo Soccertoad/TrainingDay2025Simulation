@@ -1,15 +1,21 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.arm.ArmVisualizer;
 import frc.robot.subsystems.elevator.ElevatorVisualizer;
 import frc.robot.subsystems.wrist.WristVisualizer;
 
 import static edu.wpi.first.units.Units.*;
+
+import java.util.function.Supplier;
 
 public class RobotState {
     private static RobotState instance;
@@ -21,6 +27,7 @@ public class RobotState {
     private ArmVisualizer armVisualizer = new ArmVisualizer("measured", Color.kGreen);
     private ElevatorVisualizer elevatorVisualizer = new ElevatorVisualizer("measured", Color.kGreen);
     private WristVisualizer wristVisualizer = new WristVisualizer("measured", Color.kGreen);
+    private GamepieceVisualizer gamepieceVisualizer = new GamepieceVisualizer(wristVisualizer::getPose);
 
     private RobotState() {
         elevatorPosition = Inches.mutable(0);
@@ -33,6 +40,14 @@ public class RobotState {
             instance = new RobotState();
         }
         return instance;
+    }
+
+    public void setRobotPoseSupplier(Supplier<Pose2d> robotPoseSupplier) {
+        gamepieceVisualizer.setRobotPoseSupplier(robotPoseSupplier);
+    }
+
+    public Command shoot(LinearVelocity power) {
+        return gamepieceVisualizer.shoot(power);
     }
 
     public Distance getElevatorPosition() {
@@ -62,5 +77,9 @@ public class RobotState {
     public void updateWristAngle(Angle position) {
         wristPosition.mut_replace(position);
         wristVisualizer.update(wristPosition, elevatorPosition, armPosition);
+    }
+
+    public void updateHeldGamepiece(boolean isHeld) {
+        gamepieceVisualizer.update(isHeld);
     }
 }

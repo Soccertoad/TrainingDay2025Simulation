@@ -124,6 +124,7 @@ public class RobotContainer {
         this.wrist = wrist;
 
         configureBindings();
+        RobotState.instance().setRobotPoseSupplier(() -> drivetrain.getState().Pose);
         // autoChooser = AutoBuilder.buildAutoChooser("Tests");
         // SmartDashboard.putData("Auto Mode", autoChooser);
     }
@@ -154,9 +155,6 @@ public class RobotContainer {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-
         drivetrain.registerTelemetry(logger::telemeterize);
 
         joystick.y().whileTrue(
@@ -167,7 +165,9 @@ public class RobotContainer {
         joystick.b().whileTrue(elevator.setPosition(Inches.of(50)).alongWith(arm.setPosition(Degrees.of(0))).alongWith(wrist.setPosition(Degrees.of(-60))))
             .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))).alongWith(wrist.setPosition(Degrees.of(0))));
 
-        
+        joystick.rightBumper()
+            .toggleOnTrue(RobotState.instance().shoot(MetersPerSecond.of(5)))
+            .toggleOnFalse(Commands.run(() -> RobotState.instance().updateHeldGamepiece(true)));
     }
 
     public Command getAutonomousCommand() {

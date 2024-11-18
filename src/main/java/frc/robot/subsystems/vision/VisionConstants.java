@@ -21,6 +21,6 @@ public class VisionConstants {
 
     public static final AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
 
-    public static final Matrix<N3, N1> SingleTagStdDevs = VecBuilder.fill(5, 5, 10);
+    public static final Matrix<N3, N1> SingleTagStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     public static final Matrix<N3, N1> MultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 }
