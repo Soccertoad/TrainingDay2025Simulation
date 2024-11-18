@@ -4,7 +4,11 @@ import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 
 public class VisionConstants {
     public static final SimCameraProperties SimCameraProperties = new SimCameraProperties() {{
@@ -16,4 +20,7 @@ public class VisionConstants {
     }};
 
     public static final AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+
+    public static final Matrix<N3, N1> SingleTagStdDevs = VecBuilder.fill(5, 5, 10);
+    public static final Matrix<N3, N1> MultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 }

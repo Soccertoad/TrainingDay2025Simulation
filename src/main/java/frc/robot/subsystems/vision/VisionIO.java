@@ -1,11 +1,12 @@
 package frc.robot.subsystems.vision;
 
-import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 
 public interface VisionIO {
     
@@ -13,10 +14,11 @@ public interface VisionIO {
     class VisionIOInputs {
         public String name = "";
         public Pose2d pose = new Pose2d();
-        public double timestampSeconds = 0;
-        public double latency = 0;
-        public int tagCount = 0;
-        public boolean[] tagsSeen = new boolean[30];
+        public double timestamp = 0;
+        public double ambiguity = 0;
+
+        public Pose3d[] tagPoses = new Pose3d[0];
+        public Matrix<N3, N1> curStdDevs = VisionConstants.SingleTagStdDevs;
     }
 
     record RawFiducial(

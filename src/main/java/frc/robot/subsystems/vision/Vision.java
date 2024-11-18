@@ -1,30 +1,39 @@
 package frc.robot.subsystems.vision;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.util.VirtualSubsystem;
 
 public class Vision extends VirtualSubsystem {
 
     private final VisionIO[] ios;
     private final VisionIOInputsAutoLogged[] inputs;
+    private final double[] timestamps;
     private final Supplier<Pose2d> robotPoseSupplier;
-    
+    private final Consumer<VisionMeasurement> visionMeasurementConsumer;
+
+    public record VisionMeasurement(
+        Pose2d pose,
+        double timestamp,
+        Matrix<N3, N1> curStdDevs
+    ) {};
 
 
-    public Vision(Supplier<Pose2d> robotPoseSupplier, VisionIO ...io) {
+    public Vision(Supplier<Pose2d> robotPoseSupplier, Consumer<VisionMeasurement> visionMeasurementConsumer, VisionIO ...io) {
         this.ios = io;
         this.inputs = new VisionIOInputsAutoLogged[io.length];
         this.robotPoseSupplier = robotPoseSupplier;
+        this.visionMeasurementConsumer = visionMeasurementConsumer;
+        this.timestamps = new double[io.length];
+        Arrays.fill(this.timestamps, 0);
     }
 
     @Override
@@ -39,21 +48,16 @@ public class Vision extends VirtualSubsystem {
             }
 
             io.updateInputs(input, robotPoseSupplier.get());
-
             Logger.processInputs("vision-" + input.name, input);
 
-            List<Pose3d> tags = new ArrayList<>();
-
-            for (int i = 0; i < input.tagsSeen.length; i++) {
-                if (input.tagsSeen[i]) {
-                    Optional<Pose3d> pose = VisionConstants.FieldLayout.getTagPose(i);
-                    if (pose.isPresent()) tags.add(pose.get());
-                }
+            if (input.timestamp > this.timestamps[index]) {
+                this.timestamps[index] = input.timestamp;
+                visionMeasurementConsumer.accept(new VisionMeasurement(
+                    input.pose, 
+                    input.timestamp, 
+                    input.curStdDevs
+                ));
             }
-
-            Pose3d[] tagArray = tags.toArray(new Pose3d[tags.size()]);
-
-            Logger.recordOutput("vision-" + input.name + "/TagPoses", tagArray);
         }
     }
     

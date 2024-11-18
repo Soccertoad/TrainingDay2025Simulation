@@ -7,11 +7,11 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -46,6 +46,9 @@ public class RobotContainer {
 
     private final Vision vision = new Vision(
         () -> this.drivetrain.getState().Pose,
+        (visionMeasurement) -> {
+            this.drivetrain.addVisionMeasurement(visionMeasurement.pose(), Utils.fpgaToCurrentTime(visionMeasurement.timestamp()), visionMeasurement.curStdDevs());
+        },
         new VisionIOSim(
             new VisionIOSim.CameraConfig(
                 "front",
@@ -163,6 +166,8 @@ public class RobotContainer {
         joystick.x().whileTrue(elevator.setPosition(Inches.zero()).alongWith(arm.setPosition(Degrees.zero())));
         joystick.b().whileTrue(elevator.setPosition(Inches.of(50)).alongWith(arm.setPosition(Degrees.of(0))).alongWith(wrist.setPosition(Degrees.of(-60))))
             .onFalse(elevator.setPosition(Inches.of(0)).alongWith(arm.setPosition(Degrees.of(70))).alongWith(wrist.setPosition(Degrees.of(0))));
+
+        
     }
 
     public Command getAutonomousCommand() {
