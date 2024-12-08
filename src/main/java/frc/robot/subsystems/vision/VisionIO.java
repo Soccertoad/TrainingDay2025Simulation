@@ -1,30 +1,36 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-
 public interface VisionIO {
-    
-    @AutoLog
-    class VisionIOInputs {
-        public String name = "";
-        public Pose2d pose = new Pose2d();
-        public double timestamp = 0;
-        public double ambiguity = 0;
+  @AutoLog
+  public static class VisionIOInputs {
+    public boolean connected = false;
+    public TargetObservation latestTargetObservation =
+        new TargetObservation(new Rotation2d(), new Rotation2d());
+    public PoseObservation[] poseObservations = new PoseObservation[0];
+    public int[] tagIds = new int[0];
+  }
 
-        public Pose3d[] tagPoses = new Pose3d[0];
-        public Matrix<N3, N1> curStdDevs = VisionConstants.SingleTagStdDevs;
-    }
+  /** Represents the angle to a simple target, not used for pose estimation. */
+  public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
 
-    record RawFiducial(
-        int id,
-        double ambiguity
-    ) {};
+  /** Represents a robot pose sample used for pose estimation. */
+  public static record PoseObservation(
+      double timestamp,
+      Pose3d pose,
+      double ambiguity,
+      int tagCount,
+      double averageTagDistance,
+      PoseObservationType type) {}
 
-    public void updateInputs(VisionIOInputs inputs, Pose2d robotPose);
+  public static enum PoseObservationType {
+    MEGATAG_1,
+    MEGATAG_2,
+    PHOTONVISION
+  }
+
+  public default void updateInputs(VisionIOInputs inputs) {}
 }
