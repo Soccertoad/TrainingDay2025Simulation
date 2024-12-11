@@ -9,11 +9,10 @@ import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 import static frc.robot.subsystems.vision.VisionConstants.robotToCamera2;
 import static frc.robot.subsystems.vision.VisionConstants.robotToCamera3;
 
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
@@ -21,16 +20,17 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.subsystems.wrist.WristIOSim;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
 public class SimInitializer {
-  public static Initializer initialize() {
+  public static Initializer initialize(SwerveDriveSimulation driveSim) {
     var drive =
         new Drive(
-            new GyroIO() {},
-            new ModuleIOSim(TunerConstants.FrontLeft),
-            new ModuleIOSim(TunerConstants.FrontRight),
-            new ModuleIOSim(TunerConstants.BackLeft),
-            new ModuleIOSim(TunerConstants.BackRight));
+            new GyroIOSim(driveSim.getGyroSimulation()) {},
+            new ModuleIOSim(driveSim.getModules()[0]),
+            new ModuleIOSim(driveSim.getModules()[1]),
+            new ModuleIOSim(driveSim.getModules()[2]),
+            new ModuleIOSim(driveSim.getModules()[3]));
 
     return new Initializer(
         drive,
@@ -39,9 +39,13 @@ public class SimInitializer {
         new Wrist(new WristIOSim()),
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-            new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose),
-            new VisionIOPhotonVisionSim(camera2Name, robotToCamera2, drive::getPose),
-            new VisionIOPhotonVisionSim(camera3Name, robotToCamera3, drive::getPose)));
+            new VisionIOPhotonVisionSim(
+                camera0Name, robotToCamera0, driveSim::getSimulatedDriveTrainPose),
+            new VisionIOPhotonVisionSim(
+                camera1Name, robotToCamera1, driveSim::getSimulatedDriveTrainPose),
+            new VisionIOPhotonVisionSim(
+                camera2Name, robotToCamera2, driveSim::getSimulatedDriveTrainPose),
+            new VisionIOPhotonVisionSim(
+                camera3Name, robotToCamera3, driveSim::getSimulatedDriveTrainPose)));
   }
 }

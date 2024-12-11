@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -32,10 +33,13 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.wrist.Wrist;
 import frc.robot.util.AutoCommand;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
 
+  private SwerveDriveSimulation driveSim = null;
   private final CommandXboxController joystick = new CommandXboxController(0);
 
   private final Vision vision;
@@ -58,7 +62,10 @@ public class RobotContainer {
         break;
 
       case SIM:
-        initalizer = SimInitializer.initialize();
+        driveSim =
+            new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSim);
+        initalizer = SimInitializer.initialize(driveSim);
         break;
 
       default:
@@ -188,5 +195,21 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public void resetSimulation() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    driveSim.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
+  public void displaySimFieldToAdvantageScope() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    Logger.recordOutput("FieldSimulation/RobotPosition", driveSim.getSimulatedDriveTrainPose());
+    Logger.recordOutput(
+        "FieldSimulation/Notes",
+        SimulatedArena.getInstance().getGamePiecesByType("Note").toArray(new Pose3d[0]));
   }
 }
